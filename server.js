@@ -663,8 +663,7 @@ app.patch('/api/notifications/:id/read', authMiddleware, async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`🏥 Medication Management Server running on http://localhost:${PORT}`);
-    console.log(`📊 API Documentation: http://localhost:${PORT}/api/docs`);
+  console.log(`🚀 Medication Management Server running on port ${PORT}`);
 });
 
 module.exports = app;
