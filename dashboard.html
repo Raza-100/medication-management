@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Medication Dashboard</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f6f9;
+    margin: 0;
+}
+
+.header {
+    background: #3498db;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    margin-top: 30px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    width: 30%;
+}
+
+button {
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Medication Management Dashboard 💊</h2>
+</div>
+
+<div class="container">
+
+    <!-- Add Medicine -->
+    <div class="card">
+        <h3>Add Medicine</h3>
+
+        <input id="name" placeholder="Medicine Name">
+        <input id="dosage" placeholder="Dosage">
+        <input id="timing" placeholder="Timing">
+
+        <br><br>
+        <button onclick="addMedicine()">Add Medicine</button>
+
+        <p id="msg"></p>
+    </div>
+
+    <!-- Medicine List -->
+    <div class="card">
+        <h3>Medicine List</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Dosage</th>
+                    <th>Timing</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+// ✅ ADD MEDICINE (UPDATED)
+async function addMedicine() {
+    const name = document.getElementById("name").value;
+    const dosage = document.getElementById("dosage").value;
+    const timing = document.getElementById("timing").value;
+    const msg = document.getElementById("msg");
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/add-medicine", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                dosage: dosage,
+                timing: timing,
+                user_id: 1
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            msg.innerText = data.message;
+            msg.className = "success";
+
+            loadMedicines();
+
+            // ✅ CLEAR INPUT FIELDS (ADDED HERE)
+            document.getElementById("name").value = "";
+            document.getElementById("dosage").value = "";
+            document.getElementById("timing").value = "";
+
+        } else {
+            msg.innerText = data.error;
+            msg.className = "error";
+        }
+
+    } catch (err) {
+        console.log(err);
+        msg.innerText = "Server not reachable";
+        msg.className = "error";
+    }
+}
+
+
+// ✅ LOAD MEDICINES (UPDATED WITH ID)
+async function loadMedicines() {
+    try {
+        const res = await fetch("http://127.0.0.1:5000/medicines");
+        const data = await res.json();
+
+        const table = document.getElementById("tableBody");
+        table.innerHTML = "";
+
+        if (data.length === 0) {
+            table.innerHTML = `<tr><td colspan="4">No medicines added yet</td></tr>`;
+            return;
+        }
+
+        data.forEach(med => {
+            table.innerHTML += `
+                <tr>
+                    <td>${med.id}</td>
+                    <td>${med.name}</td>
+                    <td>${med.dosage}</td>
+                    <td>${med.timing}</td>
+                </tr>
+            `;
+        });
+
+    } catch (err) {
+        console.log("Error loading medicines");
+    }
+}
+
+// 🔁 AUTO LOAD
+loadMedicines();
+
+</script>
+
+</body>
+</html>
